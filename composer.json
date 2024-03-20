@@ -1,0 +1,15 @@
+{
+    "name": "crissu91/workopia-php",
+    "description" : "Job listing application",
+    "authors": [
+        {
+            "name": "Cristina"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Framework\\": "Framework/",
+            "App\\": "App/"
+        }
+    }
+}
