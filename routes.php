@@ -15,3 +15,6 @@ $router->delete('/listings/{id}', 'ListingController@destroy');
 // $router->get('/listings/create', 'controllers/listings/create.php');
 // $router->get('/listing', 'controllers/listings/show.php');
 // $router->get('404', 'controllers/error/404.php');
+
+$router->get('/auth/register', 'UserController@create');
+$router->get('/auth/login', 'UserController@login');
