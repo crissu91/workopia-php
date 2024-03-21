@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use Framework\Database;
 use Framework\Validation;
+use Framework\Session;
 
 class UserController
 {
@@ -77,8 +78,61 @@ class UserController
                 ]
             ]);
             exit;
-        } else {
-            inspectAndDie('Store');
         }
+
+        //Check if email exists
+        $params = [
+            'email' => $email,
+        ];
+
+        $user = $this->db->query('SELECT * FROM users WHERE email = :email', $params)->fetch();
+
+        if ($user) {
+            $errors['email'] = 'Email already registered.';
+            loadView('users/create', [
+                'errors' => $errors,
+            ]);
+            exit;
+        }
+
+        //Create user account
+        $params = [
+            'name' => $name,
+            'city' => $city,
+            'state' => $state,
+            'email' => $email,
+            'password' => password_hash($password, PASSWORD_DEFAULT),
+        ];
+
+        $this->db->query('INSERT INTO users (name, email, city, state, password) VALUES (:name, :email, :city, :state, :password)', $params);
+
+        //Get new user id
+        $userId = $this->db->conn->lastInsertId();
+        Session::set('user', [
+            'id' => $userId,
+            'name' => $name,
+            'city' => $city,
+            'state' => $state,
+            'email' => $email,
+        ]);
+
+
+
+        redirect('/');
+    }
+
+    /**
+     * Logout user and kill session
+     *
+     * @return void
+     */
+    public function logout()
+    {
+        Session::clearAll();
+
+        $params = session_get_cookie_params();
+        setcookie('PHPSESSID', '', time() - 86400, $params['path'], $params['domain']);
+
+        redirect('/');
     }
 }
