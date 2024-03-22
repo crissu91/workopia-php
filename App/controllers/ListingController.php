@@ -169,6 +169,10 @@ class ListingController
             ErrorController::notFound('Listing not found');
             return;
         }
+        if (!Authorization::isOwner($listing->user_id)) {
+            Session::setFlashMessage('error_message', 'You are not authorized to edit this listing');
+            return redirect(('/listings/' . $listing->id));
+        }
 
         loadView('listings/edit', [
             'listing' => $listing,
@@ -191,10 +195,15 @@ class ListingController
 
         $listing = $this->db->query('SELECT * FROM listings WHERE id=:id', $params)->fetch();
 
-        //Check if liosting exists
+        //Check if listing exists
         if (!$listing) {
             ErrorController::notFound('Listing not found');
             return;
+        }
+
+        if (!Authorization::isOwner($listing->user_id)) {
+            Session::setFlashMessage('error_message', 'You are not authorized to update this listing');
+            return redirect(('/listings/' . $listing->id));
         }
 
         $allowedFields = ['title', 'description', 'salary', 'tags', 'company', 'address', 'state', 'city', 'phone', 'email', 'requirements', 'benefits'];
@@ -237,5 +246,30 @@ class ListingController
 
         Session::setFlashMessage('success_message', 'Listing updated successfully.');
         redirect('/listings/' . $id);
+    }
+
+    /**
+     *Search listings by keyword / location
+     *@return void
+     */
+    public function search()
+    {
+        $keywords = isset($_GET['keywords']) ? trim($_GET['keywords']) : '';
+        $location = isset($_GET['location']) ? trim($_GET['location']) : '';
+
+        $query = "SELECT * FROM listings WHERE (title LIKE :keywords OR description LIKE :keywords OR tags LIKE :keywords OR company LIKE :keywords) AND (city LIKE :location OR state LIKE :location)";
+
+        $params = [
+            'keywords' => "%{$keywords}%",
+            'location' => "%{$location}%",
+        ];
+
+        $listings = $this->db->query($query, $params)->fetchAll();
+
+        loadView('/listings/index', [
+            'listings' => $listings,
+            'keywords' => $keywords,
+            'location' => $location,
+        ]);
     }
 }

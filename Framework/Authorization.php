@@ -18,8 +18,8 @@ class Authorization
         $sessionUser = Session::get('user');
 
         if ($sessionUser !== null && isset($sessionUser['id'])) {
-            $sessionUser = (int) $sessionUser['id'];
-            return $sessionUser === $resourceId;
+            $sessionUserId = (int) $sessionUser['id'];
+            return $sessionUserId === $resourceId;
         }
         return false;
     }
