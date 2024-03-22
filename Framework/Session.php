@@ -94,7 +94,7 @@ class Session
     public static function getFlashMessage($key, $default = null)
     {
         $message = self::get('flash_' . $key, $default);
-        self::clear('fash_' . $key);
+        self::clear('flash_' . $key);
         return $message;
     }
 }
